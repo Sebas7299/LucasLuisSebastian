@@ -174,3 +174,4 @@ Para el detalle completo (autenticación HMAC, pase JWT, modelo multi-tenant, ex
 ---
 
 *Para dudas técnicas, integración con el Orquestador, el detalle de la exposición vía frp o el modelo de autenticación, consulta [ARCHITECTURE.md](./ARCHITECTURE.md).*
+ 
