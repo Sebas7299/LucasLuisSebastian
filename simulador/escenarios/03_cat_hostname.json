@@ -1,0 +1,6 @@
+{
+  "nombre": "Leer /etc/hostname con cat",
+  "herramienta": "cat",
+  "params": { "archivo": "/etc/hostname" },
+  "espera_estado": "completado"
+}
