@@ -1,0 +1,6 @@
+{
+  "nombre": "Leer /etc/os-release numerando líneas (flag -n)",
+  "herramienta": "cat",
+  "params": { "archivo": "/etc/os-release", "flags": "-n" },
+  "espera_estado": "completado"
+}
