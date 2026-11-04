@@ -1,0 +1,6 @@
+{
+  "nombre": "Listar la raíz del contenedor con ls",
+  "herramienta": "ls",
+  "params": { "ruta": "/", "flags": "-la" },
+  "espera_estado": "completado"
+}
