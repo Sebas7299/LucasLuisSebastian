@@ -1,0 +1,7 @@
+{
+  "nombre": "Manejo de error: leer un archivo que no existe",
+  "herramienta": "cat",
+  "params": { "archivo": "/no/existe/este/archivo.txt" },
+  "espera_estado": "completado",
+  "nota": "El contenedor termina OK pero el adaptador reporta el error de cat en el campo 'error'; valida el camino de errores controlados."
+}
