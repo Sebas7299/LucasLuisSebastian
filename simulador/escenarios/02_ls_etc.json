@@ -1,0 +1,6 @@
+{
+  "nombre": "Listar /etc dentro del contenedor",
+  "herramienta": "ls",
+  "params": { "ruta": "/etc", "flags": "-la" },
+  "espera_estado": "completado"
+}
