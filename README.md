@@ -146,7 +146,6 @@ flowchart TD
     E --> P[Docker Socket Proxy]
     P --> C[Contenedor efímero de herramienta]
     C -->|Resultado JSON| E
-    C --> O
 ```
 
 **Flujo resumido:**
