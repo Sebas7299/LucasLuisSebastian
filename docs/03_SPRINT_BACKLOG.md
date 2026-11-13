@@ -91,7 +91,8 @@ Las historias (HU-xx) están detalladas en [02_PRODUCT_BACKLOG.md](02_PRODUCT_BA
 | Repetir los escenarios con el Orquestador original vía túnel frp | HU-11 | — | Pendiente |
 | Conversión de resultados en hallazgos para el dashboard | HU-16 | — | Pendiente |
 | Pruebas de herramientas de mayor alcance en entornos controlados | HU-17 | — | En curso |
-| Pruebas unitarias con pytest y medición de cobertura | — | — | Pendiente |
+| Pruebas unitarias de simulador y utilidades locales (`tests/`) | HU-14 | 12/11/2026 | Hecho |
+| Pruebas unitarias con pytest y medición de cobertura en microservicios | — | — | Pendiente |
 
 ## Sprint 6 — Cierre
 
