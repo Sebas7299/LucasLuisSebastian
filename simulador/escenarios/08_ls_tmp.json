@@ -1,0 +1,6 @@
+{
+  "nombre": "Listar /tmp dentro del contenedor efímero con ls",
+  "herramienta": "ls",
+  "params": { "ruta": "/tmp", "flags": "-la" },
+  "espera_estado": "completado"
+}
