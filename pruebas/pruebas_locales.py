@@ -15,7 +15,7 @@ Hace, en orden:
 
 Solo usa la librería estándar de Python. Se ejecuta en el host:
 
-  cd ~/eth-runner/simulador
+  cd ~/eth-runner/pruebas
   python3 pruebas_locales.py            # batería completa (15-25 min)
   python3 pruebas_locales.py --rapido   # omite las herramientas lentas (~3 min)
   python3 pruebas_locales.py --solo nmap,gobuster
