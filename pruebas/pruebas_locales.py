@@ -223,6 +223,8 @@ def resumen_salida(herramienta, salida):
     if not isinstance(salida, dict):
         return str(salida)[:120]
     r = salida.get("resultado") if isinstance(salida.get("resultado"), dict) else {}
+    if salida.get("error") and not r:
+        return "error: " + str(salida["error"]).strip()[:110]
     try:
         if herramienta == "nmap":
             res = r.get("resumen", {})
@@ -241,6 +243,18 @@ def resumen_salida(herramienta, salida):
             return primera[0] if primera else "sin respuesta"
         if herramienta == "sqlmap":
             return "vulnerable" if r.get("vulnerable") else "sin inyección detectada"
+        if herramienta in ("nuclei", "nikto", "xsstrike"):
+            h = r.get("hallazgos")
+            if isinstance(h, list):
+                return f"{len(h)} hallazgos reportados"
+            raw = (r.get("raw_output") or "").strip().splitlines()
+            return raw[0][:110] if raw else "sin hallazgos"
+        if herramienta in ("osquery", "radare2"):
+            filas = r.get("filas") or r.get("resultados")
+            if isinstance(filas, list):
+                return f"{len(filas)} registros devueltos"
+            raw = (r.get("raw_output") or "").strip().splitlines()
+            return raw[0][:110] if raw else "ejecución completada"
         if herramienta in ("trivy", "wapiti"):
             return f"estado de la herramienta: {salida.get('status', '?')}"
     except Exception:
