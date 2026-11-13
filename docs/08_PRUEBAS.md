@@ -34,8 +34,26 @@ python3 simular_orquestador.py seguridad
 | PI-03 | Leer archivo | `cat` `{"archivo": "/etc/hostname"}` | Estado `completado`, contenido del archivo | OK |
 | PI-04 | Leer archivo con flag | `cat` `{"archivo": "/etc/os-release", "flags": "-n"}` | Estado `completado`, líneas numeradas | OK |
 | PI-05 | Archivo inexistente | `cat` `{"archivo": "/no/existe/este/archivo.txt"}` | La tarea termina; el adaptador informa `codigo_salida: 1` y el error | OK |
+| PI-06 | Directorio inexistente | `ls` `{"ruta": "/no/existe/este/directorio", "flags": "-la"}` | La tarea termina; el adaptador reporta error controlado | Pendiente de corrida en stack |
+| PI-07 | Leer `/etc/hosts` | `cat` `{"archivo": "/etc/hosts"}` | Estado `completado`, contenido local | Pendiente de corrida en stack |
+| PI-08 | Listar `/tmp` limpio | `ls` `{"ruta": "/tmp", "flags": "-la"}` | Estado `completado`, código 0 | Pendiente de corrida en stack |
 
-**Resultado: 5/5 escenarios correctos.**
+**Resultado última corrida ejecutada (PD-01 / PD-02): 5/5 escenarios iniciales correctos.**
+
+## Pruebas unitarias (`tests/`)
+
+Se incorporó una batería inicial de 14 pruebas unitarias con `unittest` (solo librería estándar de Python) para validar localmente la lógica del simulador y de `pruebas_locales.py` sin requerir el stack levantado:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+| Módulo de prueba | Qué valida |
+| --- | --- |
+| `tests/test_simulador_auth.py` | Generación de firma HMAC-SHA256, construcción de JWT HS256 y carga de `INTERNAL_API_TOKEN` |
+| `tests/test_simulador_escenarios.py` | Validación de esquema e integridad de todos los JSON en `simulador/escenarios/` |
+| `tests/test_simulador_flujo.py` | Omisión de query string en HMAC, flujo de `ejecutar_escenario` y pruebas de seguridad mockeadas |
+| `tests/test_pruebas_locales.py` | `Cliente.firmar`, `Cliente.jwt`, `resumen_salida` y ciclo de vida del servidor temporal |
 
 ## Casos de prueba de seguridad
 
@@ -70,6 +88,6 @@ python3 simular_orquestador.py seguridad
 
 ## Pendientes
 
-- **Pruebas unitarias:** el proyecto todavía no tiene pruebas unitarias automatizadas (pytest) ni medición de cobertura. La Definition of Done exige más de 80% de cobertura, por lo que es una deuda a cubrir.
+- **Pruebas unitarias de microservicios y cobertura:** la suite de `tests/` cubre el simulador y `pruebas_locales.py`; resta agregar pruebas con `pytest` y medición de cobertura sobre los microservicios internos en el repositorio privado para alcanzar el >80% definido en el DoD.
 - **Herramientas de mayor alcance:** en proceso. Se están preparando entornos controlados para probar Nmap, Nuclei, SQLMap, Nikto, Gobuster, Trivy y Wapiti con datos reales.
 - **Integración real:** repetir los escenarios con el Orquestador original a través del túnel frp.
