@@ -158,3 +158,14 @@ cd ~/eth-runner
 sudo docker compose cp simulador runner-api-gateway:/app/simulador
 sudo docker compose exec api_gateway python simulador/simular_orquestador.py --url http://localhost:8000 escenarios simulador/escenarios
 ```
+
+---
+
+## Solución de problemas comunes
+
+| Síntoma | Causa probable | Cómo resolverlo |
+| --- | --- | --- |
+| `No encontré INTERNAL_API_TOKEN` | El `.env` no está en `../.env` o la variable está vacía | Pasa `--env-file /ruta/.env` o `--token <valor>`. |
+| `No pude conectar a http://127.0.0.1:8000` | El gateway no está corriendo o falta `docker-compose.override.yml` | Verifica `sudo docker compose ps` y que el puerto `127.0.0.1:8000:8000` esté publicado. |
+| `HTTP 401` con firma válida | Token distinto al del contenedor o desfase de reloj (> 5 min) | Confirma que `.env` coincide con el stack levantado y sincroniza la hora del sistema. |
+| `Tiempo de espera agotado` | Contenedor lento al descargar imagen o herramienta pesada | Aumenta el límite con `--timeout 300`. |
