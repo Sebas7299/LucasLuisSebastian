@@ -12,6 +12,6 @@
 | 8 | [Plan y resultados de pruebas](08_PRUEBAS.md) | Casos de prueba de integración, seguridad y despliegue |
 | 9 | [Innovación](09_INNOVACION.md) | Aportes del runner frente a la ejecución manual de herramientas |
 
-Documentos relacionados en la raíz del repositorio: `README.md` (descripción e instalación), `ARCHITECTURE.md` (arquitectura técnica), `docker-compose.yml`, Dockerfiles y `.env.example`.
+Documentos y recursos relacionados en la raíz del repositorio: `README.md` (descripción e instalación), `ARCHITECTURE.md` (arquitectura técnica), `CONFIDENCIALIDAD.md` (alcance del NDA), `simulador/` (simulador del Orquestador), `pruebas/` (batería de pruebas locales) y `tests/` (pruebas unitarias).
 
 **Metodología:** Scrum. La Definition of Done está descrita en el `README.md` principal.
