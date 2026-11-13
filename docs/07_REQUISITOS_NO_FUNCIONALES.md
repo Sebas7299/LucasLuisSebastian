@@ -35,3 +35,11 @@ Cada requisito indica cómo se cumple en el sistema y cómo se verifica.
 | RNF-17 | El sistema debe instalarse en cualquier Linux con Docker. | Todo corre en contenedores con Docker Compose; el host solo necesita Docker, git y curl. | Instalado en Parrot OS (Debian 13) y en Ubuntu. |
 | RNF-18 | Cada ejecución debe quedar registrada y auditable. | Se guardan parámetros, inicio, fin, duración, código de salida, error y resultado de cada tarea. | Consulta a `tareas_escaneo` y `resultados_tareas`. |
 | RNF-19 | Instalación reproducible y con diagnóstico. | `scripts/instalar_runner.sh` es idempotente y verifica servicios y túnel. | Opción `--solo-diagnostico`. |
+
+## Verificación automatizada en este repositorio
+
+| RNF | Herramienta / Suite | Qué comprueba |
+| --- | --- | --- |
+| RNF-01, RNF-02, RNF-03 | `simulador/simular_orquestador.py seguridad` y `tests/test_simulador_auth.py` | Generación/validación de firmas HMAC-SHA256, anti-replay y estructura de pases JWT con `exp`. |
+| RNF-04, RNF-16 | `simulador/simular_orquestador.py escenarios` y `tests/test_simulador_escenarios.py` | Contratos JSON de entrada/salida y aislamiento en contenedores efímeros. |
+| RNF-08 | `.gitignore` | Exclusión de `.env`, `frpc/frpc.toml`, `data/*.db` e informes locales generados. |
