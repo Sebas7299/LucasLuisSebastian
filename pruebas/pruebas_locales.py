@@ -484,6 +484,13 @@ def main():
     print(f"Herramientas: {h['OK']} OK · {h['REVISAR']} revisar · {h['FALLO']} fallo · {h['TIEMPO']} tiempo agotado")
     print(f"Informe: {os.path.abspath(base + '.md')}\n         {os.path.abspath(base + '.json')}")
 
+    fallos = any(
+        resumen[sec][0] != resumen[sec][1]
+        for sec in ("api", "seguridad", "errores", "dashboard")
+    ) or h["FALLO"] > 0
+    if fallos:
+        sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
