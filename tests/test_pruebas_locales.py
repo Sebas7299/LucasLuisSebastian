@@ -4,7 +4,9 @@ import hmac
 import json
 import os
 import sys
+import tempfile
 import unittest
+from unittest import mock
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 PRUEBAS_DIR = os.path.join(ROOT_DIR, "pruebas")
@@ -62,6 +64,38 @@ class TestResumenSalida(unittest.TestCase):
         for herramienta, salida, esperado in casos:
             with self.subTest(herramienta=herramienta):
                 self.assertEqual(pl.resumen_salida(herramienta, salida), esperado)
+
+
+class TestServidorYTokenPruebasLocales(unittest.TestCase):
+    def test_cargar_token_con_comillas_y_comentarios(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            dotenv = os.path.join(tmp, ".env")
+            with open(dotenv, "w", encoding="utf-8") as f:
+                f.write("# Token interno\nINTERNAL_API_TOKEN=\"mi-token-con-comillas\"\n")
+            with mock.patch.dict(os.environ, {"INTERNAL_API_TOKEN": ""}, clear=False):
+                self.assertEqual(pl.cargar_token(dotenv, ""), "mi-token-con-comillas")
+
+    def test_servidor_temporal_crea_paginas_y_limpia_directorio(self):
+        fake_srv = mock.MagicMock()
+
+        def fake_server(addr, handler):
+            fake_srv.server_address = addr
+            return fake_srv
+
+        with mock.patch.object(pl.http.server, "ThreadingHTTPServer", side_effect=fake_server), \
+                mock.patch.object(pl.threading, "Thread"):
+            srv = pl.levantar_servidor_prueba("127.0.0.1", 8088)
+
+        temp_dir = srv._temp_dir
+        try:
+            self.assertTrue(os.path.isfile(os.path.join(temp_dir, "robots.txt")))
+            self.assertTrue(os.path.isfile(os.path.join(temp_dir, "admin", "index.html")))
+        finally:
+            pl.detener_servidor_prueba(srv)
+
+        fake_srv.shutdown.assert_called_once()
+        fake_srv.server_close.assert_called_once()
+        self.assertFalse(os.path.exists(temp_dir))
 
 
 if __name__ == "__main__":
