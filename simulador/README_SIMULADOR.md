@@ -14,7 +14,10 @@ simulador/
 │   ├── 02_ls_etc.json
 │   ├── 03_cat_hostname.json
 │   ├── 04_cat_numerado.json
-│   └── 05_cat_inexistente.json
+│   ├── 05_cat_inexistente.json
+│   ├── 06_ls_inexistente.json
+│   ├── 07_cat_etc_hosts.json
+│   └── 08_ls_tmp.json
 └── README_SIMULADOR.md
 ```
 
@@ -71,10 +74,10 @@ python3 simular_orquestador.py escenarios escenarios/
 
 Para cada escenario verás la herramienta, los parámetros, el número de tarea, el
 estado final (`completado`), el código de salida y un recorte de la salida. Al
-final, un resumen tipo `5/5 escenarios OK`.
+final, un resumen tipo `8/8 escenarios OK`.
 
-> El escenario `05_cat_inexistente.json` prueba el **manejo de errores**: el
-> contenedor termina bien, pero el adaptador reporta que el archivo no existe.
+> Los escenarios `05_cat_inexistente.json` y `06_ls_inexistente.json` prueban el **manejo de errores**: el
+> contenedor termina bien, pero el adaptador reporta que el archivo o ruta no existe.
 > Es intencional: valida que un error de la herramienta no rompe el runner.
 
 ---
@@ -135,9 +138,11 @@ Un escenario es un JSON con esta forma:
 ## Opciones del simulador
 
 ```
---url URL         URL base del gateway (default: http://127.0.0.1:8000)
---env-file RUTA   .env de donde leer el token (default: ../.env)
---token TOKEN     Token directo (tiene prioridad sobre --env-file)
+--url URL            URL base del gateway (default: http://127.0.0.1:8000)
+--env-file RUTA      .env de donde leer el token (default: ../.env)
+--token TOKEN        Token directo (tiene prioridad sobre --env-file)
+--timeout SEGUNDOS   Tiempo máximo de espera por escenario (default: 90)
+--poll-interval SEG  Intervalo entre consultas de estado (default: 2.0)
 ```
 
 ---
