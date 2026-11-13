@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Entorno y secretos locales
+.env
+frpc/frpc.toml
+docker-compose.override.yml
+data/*.db
+
+# Informes generados por pruebas_locales.py
+resultados_pruebas_*.json
+resultados_pruebas_*.md
