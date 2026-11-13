@@ -173,5 +173,25 @@ Para el detalle completo (autenticación HMAC, pase JWT, modelo multi-tenant, ex
 
 ---
 
+## Pruebas y verificación
+
+El repositorio incluye tres niveles de validación sin dependencias externas (solo librería estándar de Python):
+
+```bash
+# Pruebas unitarias locales (simulador, firmas HMAC/JWT y utilidades)
+python -m unittest discover -s tests -v
+
+# Simulador del Orquestador contra el stack levantado
+python3 simulador/simular_orquestador.py escenarios simulador/escenarios/
+python3 simulador/simular_orquestador.py seguridad
+
+# Batería completa de pruebas locales (modo rápido)
+python3 pruebas/pruebas_locales.py --rapido
+```
+
+Para más detalle consulta [`simulador/README_SIMULADOR.md`](./simulador/README_SIMULADOR.md) y [`docs/08_PRUEBAS.md`](./docs/08_PRUEBAS.md).
+
+---
+
 *Para dudas técnicas, integración con el Orquestador, el detalle de la exposición vía frp o el modelo de autenticación, consulta [ARCHITECTURE.md](./ARCHITECTURE.md).*
  
