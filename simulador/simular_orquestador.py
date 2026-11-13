@@ -133,7 +133,15 @@ def preparar_sesion(base: str, token: str, etiqueta: str = "simulador"):
     return s["sesion_id"]
 
 
-def ejecutar_escenario(base: str, token: str, sesion_id: int, escenario: dict, orden: int):
+def ejecutar_escenario(
+    base: str,
+    token: str,
+    sesion_id: int,
+    escenario: dict,
+    orden: int,
+    timeout: int = 90,
+    poll_interval: float = 2.0,
+):
     nombre = escenario.get("nombre", escenario.get("herramienta", "sin nombre"))
     herramienta = escenario["herramienta"]
     params = escenario.get("params", {})
@@ -157,13 +165,14 @@ def ejecutar_escenario(base: str, token: str, sesion_id: int, escenario: dict, o
     # Poll
     r = {}
     finalizado = False
-    for _ in range(45):
+    deadline = time.time() + max(timeout, 1)
+    while time.time() < deadline:
         st, r = firmado(base, token, "GET", f"/proxy/tareas/{tarea_id}")
         estado = r.get("estado") if isinstance(r, dict) else None
         if estado in ("completado", "fallido"):
             finalizado = True
             break
-        time.sleep(2)
+        time.sleep(max(poll_interval, 0.1))
 
     estado = r.get("estado") if isinstance(r, dict) else "?"
     codigo = r.get("codigo_salida") if isinstance(r, dict) else "?"
@@ -267,6 +276,8 @@ def main():
     ap.add_argument("--url", default="http://127.0.0.1:8000", help="URL base del gateway")
     ap.add_argument("--env-file", default=os.path.join(os.path.dirname(__file__), "..", ".env"))
     ap.add_argument("--token", default="")
+    ap.add_argument("--timeout", type=int, default=90, help="Tiempo máximo de espera por escenario en segundos (default: 90)")
+    ap.add_argument("--poll-interval", type=float, default=2.0, help="Intervalo entre consultas de estado en segundos (default: 2.0)")
 
     sub = ap.add_subparsers(dest="modo", required=True)
     s1 = sub.add_parser("escenario", help="Correr un escenario JSON")
@@ -299,7 +310,17 @@ def main():
     for i, ruta in enumerate(archivos, start=1):
         with open(ruta, encoding="utf-8") as f:
             escenario = json.load(f)
-        resultados.append(ejecutar_escenario(base, token, sesion_id, escenario, orden=i))
+        resultados.append(
+            ejecutar_escenario(
+                base,
+                token,
+                sesion_id,
+                escenario,
+                orden=i,
+                timeout=args.timeout,
+                poll_interval=args.poll_interval,
+            )
+        )
 
     print(f"\n==================== Resumen: {sum(resultados)}/{len(resultados)} escenarios OK")
     sys.exit(0 if all(resultados) else 1)
