@@ -364,8 +364,14 @@ def main():
     # 4. Sesión + servidor de prueba
     print("\n[4] Preparando sesión y objetivo propio")
     st, u = c.firmado("POST", "/usuarios/", {"external_id": "pruebas-locales", "nombre": "Pruebas locales"})
+    if st != 200 or not isinstance(u, dict) or "usuario_id" not in u:
+        sys.exit(f"❌ No pude crear/obtener el usuario de prueba ({st}): {u}")
     st2, o = c.firmado("POST", "/objetivos/", {"usuario_id": u["usuario_id"], "url_objetivo": web})
+    if st2 != 200 or not isinstance(o, dict) or "objetivo_id" not in o:
+        sys.exit(f"❌ No pude crear el objetivo de prueba ({st2}): {o}")
     st3, s = c.firmado("POST", "/sesiones/", {"objetivo_id": o["objetivo_id"]})
+    if st3 != 200 or not isinstance(s, dict) or "sesion_id" not in s:
+        sys.exit(f"❌ No pude crear la sesión de prueba ({st3}): {s}")
     sesion_id = s["sesion_id"]
     print(f"  ✅ usuario {u['usuario_id']}, objetivo {o['objetivo_id']}, sesión {sesion_id}")
     try:
