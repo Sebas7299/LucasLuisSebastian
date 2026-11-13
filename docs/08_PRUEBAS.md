@@ -42,7 +42,7 @@ python3 simular_orquestador.py seguridad
 
 ## Pruebas unitarias (`tests/`)
 
-Se incorporó una batería inicial de 14 pruebas unitarias con `unittest` (solo librería estándar de Python) para validar localmente la lógica del simulador y de `pruebas_locales.py` sin requerir el stack levantado:
+Se incorporó una batería inicial de 15 pruebas unitarias con `unittest` (solo librería estándar de Python) para validar localmente la lógica del simulador y de `pruebas_locales.py` sin requerir el stack levantado:
 
 ```bash
 python -m unittest discover -s tests -v
