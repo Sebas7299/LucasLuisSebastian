@@ -319,6 +319,7 @@ def main():
     ap.add_argument("--puerto", type=int, default=8088, help="Puerto del servidor web de prueba")
     ap.add_argument("--rapido", action="store_true", help="Omite las herramientas lentas")
     ap.add_argument("--solo", default="", help="Lista de herramientas separadas por coma")
+    ap.add_argument("--salida-dir", default=".", help="Carpeta donde guardar los informes JSON y Markdown")
     a = ap.parse_args()
 
     c = Cliente(a.url, cargar_token(a.env_file, a.token))
@@ -447,7 +448,8 @@ def main():
     }
     informe["resumen"] = resumen
     sello = dt.datetime.now().strftime("%Y%m%d_%H%M")
-    base = f"resultados_pruebas_{sello}"
+    os.makedirs(a.salida_dir, exist_ok=True)
+    base = os.path.join(a.salida_dir, f"resultados_pruebas_{sello}")
     with open(base + ".json", "w", encoding="utf-8") as f:
         json.dump(informe, f, ensure_ascii=False, indent=2, default=str)
 
