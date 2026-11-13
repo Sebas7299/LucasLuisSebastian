@@ -133,6 +133,22 @@ def preparar_sesion(base: str, token: str, etiqueta: str = "simulador"):
     return s["sesion_id"]
 
 
+def validar_escenario(escenario: dict) -> dict:
+    """Valida la estructura mínima de un escenario JSON antes de enviarlo al runner."""
+    if not isinstance(escenario, dict):
+        raise ValueError("El escenario debe ser un objeto JSON.")
+    herramienta = escenario.get("herramienta")
+    if not isinstance(herramienta, str) or not herramienta.strip():
+        raise ValueError("El escenario debe incluir 'herramienta' como texto no vacío.")
+    params = escenario.get("params", {})
+    if not isinstance(params, dict):
+        raise ValueError("El campo 'params' debe ser un objeto JSON.")
+    esperado = escenario.get("espera_estado", "completado")
+    if esperado not in ("completado", "fallido"):
+        raise ValueError("El campo 'espera_estado' debe ser 'completado' o 'fallido'.")
+    return escenario
+
+
 def ejecutar_escenario(
     base: str,
     token: str,
@@ -308,8 +324,11 @@ def main():
 
     resultados = []
     for i, ruta in enumerate(archivos, start=1):
-        with open(ruta, encoding="utf-8") as f:
-            escenario = json.load(f)
+        try:
+            with open(ruta, encoding="utf-8") as f:
+                escenario = validar_escenario(json.load(f))
+        except (OSError, json.JSONDecodeError, ValueError) as exc:
+            sys.exit(f"❌ Escenario inválido ({ruta}): {exc}")
         resultados.append(
             ejecutar_escenario(
                 base,
