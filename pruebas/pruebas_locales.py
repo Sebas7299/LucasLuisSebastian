@@ -270,15 +270,15 @@ def correr_herramienta(c, sesion_id, orden, nombre, herramienta, params, espera_
     st, t = c.firmado("POST", "/proxy/ejecutar",
                       {"herramienta": herramienta, "params": params, "sesion_id": sesion_id, "orden_ejecucion": orden})
     fila = {"nombre": nombre, "herramienta": herramienta, "params": params}
-    if st != 200 or not isinstance(t, dict):
+    if st != 200 or not isinstance(t, dict) or "tarea_id" not in t:
         fila.update(veredicto="FALLO", estado=f"HTTP {st}", codigo=None, duracion=0, detalle=str(t)[:150])
         return fila
-    tarea, esperado = esperar_tarea(c, t["tarea_id"], espera_max)
+    tarea, transcurrido = esperar_tarea(c, t["tarea_id"], espera_max)
     estado = tarea.get("estado", "?")
     codigo = tarea.get("codigo_salida")
     salida = (tarea.get("resultado") or {}).get("json_output")
     fila.update(tarea_id=t["tarea_id"], estado=estado, codigo=codigo,
-                duracion=tarea.get("duracion_segundos") or esperado, salida=salida)
+                duracion=tarea.get("duracion_segundos") or transcurrido, salida=salida)
     if estado == "completado" and codigo == 0:
         fila.update(veredicto="OK", detalle=resumen_salida(herramienta, salida))
     elif estado == "completado":
