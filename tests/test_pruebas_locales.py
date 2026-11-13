@@ -97,6 +97,20 @@ class TestServidorYTokenPruebasLocales(unittest.TestCase):
         fake_srv.server_close.assert_called_once()
         self.assertFalse(os.path.exists(temp_dir))
 
+    def test_detectar_ip_docker_y_escenarios(self):
+        fake_proc = mock.Mock(stdout="3: docker0: inet 172.18.0.1/16 brd 172.18.255.255")
+        with mock.patch.object(pl.subprocess, "run", return_value=fake_proc):
+            self.assertEqual(pl.detectar_ip_docker(), "172.18.0.1")
+
+        with mock.patch.object(pl.subprocess, "run", side_effect=OSError("sin comando ip")):
+            self.assertEqual(pl.detectar_ip_docker(), "172.17.0.1")
+
+        lista = pl.escenarios("172.17.0.1", "http://172.17.0.1:8088/", 8088)
+        nombres_herr = [item[1] for item in lista]
+        self.assertIn("nmap", nombres_herr)
+        self.assertIn("trivy", nombres_herr)
+        self.assertTrue(all(len(item) == 5 for item in lista))
+
 
 if __name__ == "__main__":
     unittest.main()
