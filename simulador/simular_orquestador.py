@@ -109,7 +109,9 @@ def http(base: str, method: str, path: str, headers: dict, body: bytes = b""):
 
 def firmado(base: str, token: str, method: str, path: str, payload=None):
     body = json.dumps(payload, separators=(",", ":")).encode() if payload is not None else b""
-    return http(base, method, path, firmar(token, method, path, body), body)
+    # El runner valida la firma HMAC solo sobre la ruta sin query string
+    ruta_firma = path.split("?", 1)[0]
+    return http(base, method, path, firmar(token, method, ruta_firma, body), body)
 
 
 # --------------------------------------------------------------------------
