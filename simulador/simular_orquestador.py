@@ -56,10 +56,15 @@ def cargar_token(args) -> str:
     # Leer del .env
     ruta = args.env_file
     if os.path.exists(ruta):
-        for linea in open(ruta, encoding="utf-8"):
-            linea = linea.strip()
-            if linea.startswith("INTERNAL_API_TOKEN="):
-                return linea.split("=", 1)[1].strip()
+        with open(ruta, encoding="utf-8") as f:
+            for linea in f:
+                linea = linea.strip()
+                if not linea or linea.startswith("#"):
+                    continue
+                if linea.startswith("INTERNAL_API_TOKEN="):
+                    valor = linea.split("=", 1)[1].strip().strip("'\"")
+                    if valor:
+                        return valor
     sys.exit(
         "❌ No encontré INTERNAL_API_TOKEN. Pásalo con --token, expórtalo como "
         "variable de entorno, o apunta --env-file al .env correcto."
