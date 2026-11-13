@@ -156,16 +156,21 @@ def ejecutar_escenario(base: str, token: str, sesion_id: int, escenario: dict, o
 
     # Poll
     r = {}
+    finalizado = False
     for _ in range(45):
         st, r = firmado(base, token, "GET", f"/proxy/tareas/{tarea_id}")
         estado = r.get("estado") if isinstance(r, dict) else None
         if estado in ("completado", "fallido"):
+            finalizado = True
             break
         time.sleep(2)
 
     estado = r.get("estado") if isinstance(r, dict) else "?"
     codigo = r.get("codigo_salida") if isinstance(r, dict) else "?"
-    print(f"  estado final: {estado}  (código de salida: {codigo})")
+    if not finalizado:
+        print(f"  ⏳ Tiempo de espera agotado; último estado: {estado}")
+    else:
+        print(f"  estado final: {estado}  (código de salida: {codigo})")
 
     esperado = escenario.get("espera_estado", "completado")
     ok = estado == esperado
