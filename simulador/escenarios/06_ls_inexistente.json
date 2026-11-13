@@ -1,0 +1,7 @@
+{
+  "nombre": "Manejo de error: listar una ruta que no existe",
+  "herramienta": "ls",
+  "params": { "ruta": "/no/existe/este/directorio", "flags": "-la" },
+  "espera_estado": "completado",
+  "nota": "Valida que un error de ls dentro del contenedor se reporta sin afectar al runner."
+}
