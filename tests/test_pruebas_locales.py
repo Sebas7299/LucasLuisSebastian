@@ -37,5 +37,32 @@ class TestClientePruebasLocales(unittest.TestCase):
         self.assertTrue(len(s_b64) > 0)
 
 
+class TestResumenSalida(unittest.TestCase):
+    def test_resumen_por_herramienta(self):
+        casos = [
+            (
+                "nmap",
+                {"resultado": {"hosts": [{"puertos_abiertos": [{"puerto": 80, "servicio": "http"}]}]}},
+                "1 puertos abiertos: 80/http",
+            ),
+            (
+                "gobuster",
+                {"resultado": {"hallazgos": [{"ruta": "/admin", "status": 200}]}},
+                "1 rutas: /admin(200)",
+            ),
+            ("ls", {"resultado": {"total": 12}}, "12 entradas listadas"),
+            ("cat", {"resultado": {"lineas": 5}}, "5 líneas leídas"),
+            ("curl", {"resultado": {"stdout": "HTTP/1.1 200 OK\r\n"}}, "HTTP/1.1 200 OK"),
+            ("sqlmap", {"resultado": {"vulnerable": False}}, "sin inyección detectada"),
+            ("nuclei", {"resultado": {"hallazgos": [{"id": "tech-detect"}]}}, "1 hallazgos reportados"),
+            ("osquery", {"resultado": {"filas": [{"pid": 1}, {"pid": 2}]}}, "2 registros devueltos"),
+            ("trivy", {"status": "ok", "resultado": {"ok": True}}, "estado de la herramienta: ok"),
+            ("cat", {"error": "No such file"}, "error: No such file"),
+        ]
+        for herramienta, salida, esperado in casos:
+            with self.subTest(herramienta=herramienta):
+                self.assertEqual(pl.resumen_salida(herramienta, salida), esperado)
+
+
 if __name__ == "__main__":
     unittest.main()
