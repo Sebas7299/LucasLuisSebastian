@@ -63,8 +63,11 @@ def cargar_token(env_file: str, token_arg: str) -> str:
         if ruta and os.path.isfile(ruta):
             with open(ruta, encoding="utf-8") as f:
                 for linea in f:
-                    if linea.strip().startswith("INTERNAL_API_TOKEN="):
-                        valor = linea.split("=", 1)[1].strip()
+                    linea = linea.strip()
+                    if not linea or linea.startswith("#"):
+                        continue
+                    if linea.startswith("INTERNAL_API_TOKEN="):
+                        valor = linea.split("=", 1)[1].strip().strip("'\"")
                         if valor:
                             return valor
     sys.exit("❌ No encontré INTERNAL_API_TOKEN (usa --token o --env-file).")
