@@ -246,6 +246,8 @@ Deberás agregar la herramienta en `docker-compose.yml` (bajo el formato `tool_n
 
 ## Pruebas de la API (Ejemplos)
 
+Para ejecutar pruebas reproducibles sin dependencias externas (solo librería estándar de Python) puedes usar [`simulador/simular_orquestador.py`](./simulador/simular_orquestador.py), [`pruebas/pruebas_locales.py`](./pruebas/pruebas_locales.py) o la suite unitaria en `tests/` (`python -m unittest discover -s tests -v`).
+
 El siguiente script en Python demuestra cómo el orquestador (o tú mismo) puede construir la firma HMAC y lanzar una ejecución.
 
 ```python
