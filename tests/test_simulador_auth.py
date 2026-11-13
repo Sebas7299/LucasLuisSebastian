@@ -1,10 +1,13 @@
+import argparse
 import base64
 import hashlib
 import hmac
 import json
 import os
 import sys
+import tempfile
 import unittest
+from unittest import mock
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SIMULADOR_DIR = os.path.join(ROOT_DIR, "simulador")
@@ -52,6 +55,26 @@ class TestSimuladorAuth(unittest.TestCase):
             hmac.new(token.encode(), f"{partes[0]}.{partes[1]}".encode(), hashlib.sha256).digest()
         )
         self.assertEqual(partes[2], firma_esperada)
+
+    def test_cargar_token_prioridad_y_lectura_dotenv(self):
+        args_tok = argparse.Namespace(token="  tok-cli  ", env_file="no-existe.env")
+        self.assertEqual(sim.cargar_token(args_tok), "tok-cli")
+
+        with mock.patch.dict(os.environ, {"INTERNAL_API_TOKEN": "tok-env"}, clear=False):
+            args_env = argparse.Namespace(token="", env_file="no-existe.env")
+            self.assertEqual(sim.cargar_token(args_env), "tok-env")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            dotenv = os.path.join(tmp, ".env")
+            with open(dotenv, "w", encoding="utf-8") as f:
+                f.write("# comentario\nOTRA=123\nINTERNAL_API_TOKEN='tok-archivo'\n")
+            with mock.patch.dict(os.environ, {"INTERNAL_API_TOKEN": ""}, clear=False):
+                args_file = argparse.Namespace(token="", env_file=dotenv)
+                self.assertEqual(sim.cargar_token(args_file), "tok-archivo")
+
+                args_missing = argparse.Namespace(token="", env_file=os.path.join(tmp, "falta.env"))
+                with self.assertRaises(SystemExit):
+                    sim.cargar_token(args_missing)
 
 
 if __name__ == "__main__":
