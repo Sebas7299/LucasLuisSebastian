@@ -1,3 +1,5 @@
+import glob
+import json
 import os
 import sys
 import unittest
@@ -32,6 +34,17 @@ class TestValidarEscenario(unittest.TestCase):
             with self.subTest(caso=caso):
                 with self.assertRaises(ValueError):
                     sim.validar_escenario(caso)
+
+    def test_todos_los_archivos_de_escenarios_son_validos(self):
+        carpeta = os.path.join(SIMULADOR_DIR, "escenarios")
+        archivos = sorted(glob.glob(os.path.join(carpeta, "*.json")))
+        self.assertGreaterEqual(len(archivos), 8)
+        for ruta in archivos:
+            with self.subTest(archivo=os.path.basename(ruta)):
+                with open(ruta, encoding="utf-8") as f:
+                    data = json.load(f)
+                sim.validar_escenario(data)
+                self.assertIn(data["herramienta"], {"ls", "cat"})
 
 
 if __name__ == "__main__":
