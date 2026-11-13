@@ -1,0 +1,6 @@
+{
+  "nombre": "Leer /etc/hosts dentro del contenedor con cat",
+  "herramienta": "cat",
+  "params": { "archivo": "/etc/hosts" },
+  "espera_estado": "completado"
+}
