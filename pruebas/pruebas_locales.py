@@ -37,6 +37,7 @@ import http.server
 import json
 import os
 import re
+import shutil
 import socket
 import subprocess
 import sys
@@ -159,18 +160,34 @@ class _Silencioso(http.server.SimpleHTTPRequestHandler):
 
 def levantar_servidor_prueba(host, puerto):
     raiz = tempfile.mkdtemp(prefix="eth_runner_objetivo_")
-    for ruta, contenido in PAGINAS.items():
-        destino = os.path.join(raiz, ruta)
-        os.makedirs(os.path.dirname(destino), exist_ok=True)
-        with open(destino, "w", encoding="utf-8") as f:
-            f.write(contenido)
+    try:
+        for ruta, contenido in PAGINAS.items():
+            destino = os.path.join(raiz, ruta)
+            os.makedirs(os.path.dirname(destino), exist_ok=True)
+            with open(destino, "w", encoding="utf-8") as f:
+                f.write(contenido)
 
-    def handler(*a, **kw):
-        return _Silencioso(*a, directory=raiz, **kw)
+        def handler(*a, **kw):
+            return _Silencioso(*a, directory=raiz, **kw)
 
-    srv = http.server.ThreadingHTTPServer((host, puerto), handler)
+        srv = http.server.ThreadingHTTPServer((host, puerto), handler)
+    except Exception:
+        shutil.rmtree(raiz, ignore_errors=True)
+        raise
+    srv._temp_dir = raiz
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     return srv
+
+
+def detener_servidor_prueba(srv):
+    """Detiene el servidor HTTP temporal y elimina su directorio temporal."""
+    try:
+        srv.shutdown()
+        srv.server_close()
+    finally:
+        temp_dir = getattr(srv, "_temp_dir", None)
+        if temp_dir:
+            shutil.rmtree(temp_dir, ignore_errors=True)
 
 
 # --------------------------------------------------------------------------
@@ -358,41 +375,42 @@ def main():
                  "Prueba con --puerto 8099 o --host <tu IP>.")
     print(f"  ✅ servidor de prueba en {web} (solo visible desde Docker en tu máquina)")
 
-    # 5. Herramientas
-    lista = escenarios(ip, web, a.puerto)
-    if a.solo:
-        elegidas = {x.strip() for x in a.solo.split(",") if x.strip()}
-        lista = [e for e in lista if e[1] in elegidas]
-    elif a.rapido:
-        lista = [e for e in lista if not e[4]]
-    print(f"\n[5] Ejecutando {len(lista)} herramientas (una a la vez)")
-    for i, (nombre, herr, params, espera, _) in enumerate(lista, 1):
-        print(f"  … [{i}/{len(lista)}] {herr}: {nombre} (hasta {espera}s)", flush=True)
-        fila = correr_herramienta(c, sesion_id, i, nombre, herr, params, espera)
-        informe["herramientas"].append(fila)
-        print(f"  {ICONO[fila['veredicto']]} {herr} — {fila['detalle']} [{fila['duracion']}s]")
+    try:
+        # 5. Herramientas
+        lista = escenarios(ip, web, a.puerto)
+        if a.solo:
+            elegidas = {x.strip() for x in a.solo.split(",") if x.strip()}
+            lista = [e for e in lista if e[1] in elegidas]
+        elif a.rapido:
+            lista = [e for e in lista if not e[4]]
+        print(f"\n[5] Ejecutando {len(lista)} herramientas (una a la vez)")
+        for i, (nombre, herr, params, espera, _) in enumerate(lista, 1):
+            print(f"  … [{i}/{len(lista)}] {herr}: {nombre} (hasta {espera}s)", flush=True)
+            fila = correr_herramienta(c, sesion_id, i, nombre, herr, params, espera)
+            informe["herramientas"].append(fila)
+            print(f"  {ICONO[fila['veredicto']]} {herr} — {fila['detalle']} [{fila['duracion']}s]")
 
-    # 6. Manejo de errores
-    print("\n[6] Manejo de errores")
-    st, _ = c.firmado("POST", "/proxy/ejecutar",
-                      {"herramienta": "no_existe", "params": {}, "sesion_id": sesion_id, "orden_ejecucion": 99})
-    ok = st != 200
-    informe["errores"].append({"prueba": "Herramienta inexistente", "obtenido": st, "ok": ok})
-    print(f"  {'✅' if ok else '❌'} Herramienta inexistente: rechazada con HTTP {st}")
-    fila = correr_herramienta(c, sesion_id, 100, "nmap sin el parámetro obligatorio", "nmap", {}, 120)
-    ok = fila.get("estado") == "completado" and fila.get("codigo") not in (0, None)
-    informe["errores"].append({"prueba": "Parámetro obligatorio faltante", "obtenido": fila.get("codigo"), "ok": ok})
-    print(f"  {'✅' if ok else '❌'} Parámetro faltante: la tarea terminó con código {fila.get('codigo')} "
-          f"y el runner siguió funcionando")
+        # 6. Manejo de errores
+        print("\n[6] Manejo de errores")
+        st, _ = c.firmado("POST", "/proxy/ejecutar",
+                          {"herramienta": "no_existe", "params": {}, "sesion_id": sesion_id, "orden_ejecucion": 99})
+        ok = st != 200
+        informe["errores"].append({"prueba": "Herramienta inexistente", "obtenido": st, "ok": ok})
+        print(f"  {'✅' if ok else '❌'} Herramienta inexistente: rechazada con HTTP {st}")
+        fila = correr_herramienta(c, sesion_id, 100, "nmap sin el parámetro obligatorio", "nmap", {}, 120)
+        ok = fila.get("estado") == "completado" and fila.get("codigo") not in (0, None)
+        informe["errores"].append({"prueba": "Parámetro obligatorio faltante", "obtenido": fila.get("codigo"), "ok": ok})
+        print(f"  {'✅' if ok else '❌'} Parámetro faltante: la tarea terminó con código {fila.get('codigo')} "
+              f"y el runner siguió funcionando")
 
-    # 7. Dashboard
-    print("\n[7] Dashboard con pase JWT")
-    auth = {"Authorization": "Bearer " + c.jwt({"exp": int(time.time()) + 300})}
-    for ruta in ["/findings", "/metrics/risk-score", "/metrics/quick-stats", "/metrics/heatmap", "/metrics/patch-progress"]:
-        st, _ = c.http("GET", ruta, auth)
-        chequeo("dashboard", ruta, st, 200)
-
-    srv.shutdown()
+        # 7. Dashboard
+        print("\n[7] Dashboard con pase JWT")
+        auth = {"Authorization": "Bearer " + c.jwt({"exp": int(time.time()) + 300})}
+        for ruta in ["/findings", "/metrics/risk-score", "/metrics/quick-stats", "/metrics/heatmap", "/metrics/patch-progress"]:
+            st, _ = c.http("GET", ruta, auth)
+            chequeo("dashboard", ruta, st, 200)
+    finally:
+        detener_servidor_prueba(srv)
 
     # 8. Informe
     def cuenta(lista_, clave="ok"):
