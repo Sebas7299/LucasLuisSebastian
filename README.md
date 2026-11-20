@@ -195,3 +195,4 @@ Para más detalle consulta [`simulador/README_SIMULADOR.md`](./simulador/README_
 
 *Para dudas técnicas, integración con el Orquestador, el detalle de la exposición vía frp o el modelo de autenticación, consulta [ARCHITECTURE.md](./ARCHITECTURE.md), el índice en [docs/README.md](./docs/README.md) y el aviso en [CONFIDENCIALIDAD.md](./CONFIDENCIALIDAD.md).*
  
+l
